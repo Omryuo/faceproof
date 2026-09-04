@@ -1,0 +1,16 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# ONNX weights: fetched with `python -m faceproof.cli fetch-models`
+models/*.onnx
+
+# Third-party demo photographs: fetched with `python scripts/fetch_example.py`
+examples/*.jpg
+examples/*.png
+
+# Local chain state and run output
+.chaindata/
+out/
+.env

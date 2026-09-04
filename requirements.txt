@@ -1,0 +1,17 @@
+# face detection + embedding
+opencv-python>=4.9
+numpy>=1.26
+pillow>=10.0
+
+# search + page fetching
+requests>=2.31
+beautifulsoup4>=4.12
+
+# blockchain
+web3>=7.0
+eth-tester[py-evm]>=0.11
+py-solc-x>=2.0
+
+# cli
+rich>=13.0
+python-dotenv>=1.0
