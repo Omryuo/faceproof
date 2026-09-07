@@ -164,6 +164,62 @@ python -m faceproof.cli verify out/evidence.tampered.json --network local
 
 ---
 
+## Running it smoothly
+
+Stage 2 is the only unreliable part of the pipeline: the free search engines
+throttle unpredictably. Everything else is deterministic and offline.
+
+### Make the search leg reliable
+
+Set a SerpAPI key (free tier, 100 searches/month). This removes the rate
+limiting *and* upgrades the stage to true reverse image search, so no `--hint`
+is needed:
+
+```bash
+cp .env.example .env      # then fill in SERPAPI_KEY=
+```
+
+```bash
+./start.sh search examples/probe.jpg --probe-url https://upload.wikimedia.org/wikipedia/commons/c/c3/Sundar_Pichai_-_2023_%28cropped%29.jpg
+```
+
+### Before a live demo
+
+Warm the cache with one real search ten minutes ahead. `--use-cache` only ever
+falls back to a search that actually happened, so a warm cache means stage 2
+cannot leave you empty-handed on stage:
+
+```bash
+./start.sh search examples/probe.jpg --hint "Sundar Pichai"
+```
+
+Then leave it alone. Each search spends rate limit, and three or four
+back-to-back is what trips DuckDuckGo's HTTP 202. Check your ports are clear
+before starting, so `start.sh` doesn't attach to a stale chain:
+
+```bash
+lsof -ti:8545 -ti:8080
+```
+
+### Troubleshooting
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| `yahoo HTTP 500`, `ddg web HTTP 202` | rate limited | expected; `--use-cache` covers it, or set `SERPAPI_KEY` |
+| `ddg images HTTP 403` | DuckDuckGo blocks that endpoint | ignore — it is one of six providers |
+| `yandex needs a publicly reachable probe URL` | no `--probe-url` given | ignore, or pass one |
+| `[ WARN:0@...] setPreferableTarget` | OpenCV 5.x logging noise | harmless; the models load fine |
+| `could not connect to 127.0.0.1:8545` | no local chain running | `make chain`, or use `--network tester` |
+| `verify` says FAILED right after `anchor` | `--network tester` used across two commands | use `--network local`, or the one-shot `run` |
+| `no face detected` | face too small or too angled | frontal photo, face at least ~200px wide |
+
+That last chain row is the one real trap. `tester` is an in-process chain, so
+`anchor` and `verify` run as **separate commands** cannot see each other's
+writes. `./start.sh` and `make ui` both handle this correctly; it only bites if
+you drive the CLI stage by stage by hand.
+
+---
+
 ## How each stage works
 
 ### 1. Face identification
