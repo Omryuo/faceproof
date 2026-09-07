@@ -77,3 +77,53 @@ def test_count_increases_with_anchors(client):
     before = client.count()
     anchor_record(_record("https://x.com/u/status/counting"), client)
     assert client.count() == before + 1
+
+
+# -- process-wide client sharing --------------------------------------------
+
+
+def test_pool_returns_one_client_per_network():
+    """The in-process `tester` backend builds a new empty chain per client, so
+    anchoring and verifying through separate clients silently fails."""
+    from faceproof.chain import get_client, reset
+
+    reset()
+    try:
+        a = get_client("tester")
+        b = get_client("tester")
+        assert a is b
+    finally:
+        reset()
+
+
+def test_anchor_then_verify_through_the_pool_agrees():
+    """Regression: the web server anchored with one client and re-verified with
+    another, so an untampered record reported FAILED."""
+    from faceproof.chain import get_client, reset
+
+    reset()
+    try:
+        client = get_client("tester")
+        client.ensure()
+        rec = _record("https://x.com/u/status/pooled")
+        anchor_record(rec, client)
+
+        # a later, independent lookup -- as the tamper endpoint does
+        assert reverify(rec, get_client("tester"))["verdict"] == "VERIFIED"
+    finally:
+        reset()
+
+
+def test_already_anchored_receipt_has_the_same_keys_as_a_fresh_one(client):
+    """The UI reads tx_hash/gas_used/block_timestamp off the receipt; the
+    already-anchored path used to omit them and render `undefined`."""
+    rec = _record("https://x.com/u/status/shape")
+    fresh = anchor_record(rec, client)
+    again = anchor_record(rec, client)
+
+    assert fresh["status"] == "anchored"
+    assert again["status"] == "already_anchored"
+    assert set(fresh) == set(again)
+    assert again["tx_hash"] is None
+    assert again["block_number"] == fresh["block_number"]
+    assert again["block_timestamp"] == fresh["block_timestamp"]

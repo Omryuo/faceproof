@@ -18,7 +18,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qs, urlparse
 
-from .chain import ChainClient
+from .chain import get_client
 from .evidence import check_integrity
 from .face import FaceEngine, SAME_IDENTITY_COSINE
 from .pipeline import (
@@ -153,13 +153,10 @@ class FaceProofRequestHandler(BaseHTTPRequestHandler):
 
             probe_enc = encs[0]
 
-            # Generate annotated image
-            out_tmp = ROOT_DIR / "out" / "tmp_web_scan.jpg"
-            out_tmp.parent.mkdir(parents=True, exist_ok=True)
-            num_annotated = engine.annotate(data, out_tmp)
-            ann_b64 = ""
-            if out_tmp.exists():
-                ann_b64 = "data:image/jpeg;base64," + base64.b64encode(out_tmp.read_bytes()).decode("utf-8")
+            # Annotate in memory: a shared temp file would let concurrent
+            # requests hand each other the wrong image.
+            annotated, _ = engine.annotate_bytes(data)
+            ann_b64 = "data:image/jpeg;base64," + base64.b64encode(annotated).decode("utf-8")
 
             self._send_json({
                 "status": "success",
@@ -185,7 +182,12 @@ class FaceProofRequestHandler(BaseHTTPRequestHandler):
                 if "," in image_b64:
                     image_b64 = image_b64.split(",", 1)[1]
                 data = base64.b64decode(image_b64)
-                probe_path = ROOT_DIR / "out" / "uploaded_probe.jpg"
+                # Content-addressed, so two uploads in flight cannot clobber
+                # each other's file.
+                import hashlib
+
+                digest = hashlib.sha256(data).hexdigest()[:16]
+                probe_path = ROOT_DIR / "out" / "uploads" / f"{digest}.jpg"
                 probe_path.parent.mkdir(parents=True, exist_ok=True)
                 probe_path.write_bytes(data)
             else:
@@ -200,12 +202,8 @@ class FaceProofRequestHandler(BaseHTTPRequestHandler):
                 self._send_json({"error": "No face detected in probe image"}, 400)
                 return
 
-            out_tmp = ROOT_DIR / "out" / "web_boxed.jpg"
-            out_tmp.parent.mkdir(parents=True, exist_ok=True)
-            engine.annotate(data, out_tmp)
-            ann_b64 = ""
-            if out_tmp.exists():
-                ann_b64 = "data:image/jpeg;base64," + base64.b64encode(out_tmp.read_bytes()).decode("utf-8")
+            annotated, _ = engine.annotate_bytes(data)
+            ann_b64 = "data:image/jpeg;base64," + base64.b64encode(annotated).decode("utf-8")
 
             stage1_data = {
                 "face": probe_enc.to_dict(),
@@ -263,7 +261,10 @@ class FaceProofRequestHandler(BaseHTTPRequestHandler):
                 source_image=str(probe_path.name),
             )
 
-            client = ChainClient(network=network)
+            # One shared client per network for the life of the server: a fresh
+            # `tester` client would be a brand new empty chain, so stage 4 (and
+            # the tamper endpoint) would never find what stage 3 just anchored.
+            client = get_client(network)
             client.ensure()
             receipt = anchor_record(record, client, uri="faceproof-web-ui")
 
@@ -312,7 +313,7 @@ class FaceProofRequestHandler(BaseHTTPRequestHandler):
             if not found:
                 p["match"][field_name] = new_value
 
-            client = ChainClient(network=network)
+            client = get_client(network)
             client.ensure()
 
             verdict = reverify(tampered, client)

@@ -1092,15 +1092,24 @@
         });
 
         // Stage 3 & 4
-        setStep(3, 'completed', '✓ Anchored');
         setStep(4, 'completed', data.stage4.verdict);
 
+        const rcpt = data.stage3.receipt;
+        // A record anchored by an earlier run is refused a second time by the
+        // contract -- that is the tamper-evidence working, not an error. There
+        // is no new transaction in that case, so show the original block.
+        const reAnchored = rcpt.status === 'already_anchored';
+
         document.getElementById('rcpt-hash').innerText = data.stage3.record_hash;
-        document.getElementById('rcpt-network').innerText = `${data.stage3.receipt.network} (ID: ${data.stage3.receipt.chain_id})`;
-        document.getElementById('rcpt-contract').innerText = data.stage3.receipt.contract_address;
-        document.getElementById('rcpt-submitter').innerText = data.stage3.receipt.submitter;
-        document.getElementById('rcpt-tx').innerText = data.stage3.receipt.tx_hash;
-        document.getElementById('rcpt-block').innerText = `Block #${data.stage3.receipt.block_number} • ${new Date(data.stage3.receipt.block_timestamp * 1000).toLocaleString()}`;
+        document.getElementById('rcpt-network').innerText = `${rcpt.network} (ID: ${rcpt.chain_id})`;
+        document.getElementById('rcpt-contract').innerText = rcpt.contract_address;
+        document.getElementById('rcpt-submitter').innerText = rcpt.submitter;
+        document.getElementById('rcpt-tx').innerText = rcpt.tx_hash
+          || 'already anchored by an earlier run — no new transaction';
+        document.getElementById('rcpt-block').innerText =
+          `Block #${rcpt.block_number} • ${new Date(rcpt.block_timestamp * 1000).toLocaleString()}`;
+
+        setStep(3, 'completed', reAnchored ? '✓ Already anchored' : '✓ Anchored');
 
         const vc = document.getElementById('verdict-container');
         vc.innerHTML = data.stage4.verdict === 'VERIFIED'

@@ -83,6 +83,23 @@ You can also pass CLI subcommands directly to `./start.sh`, e.g.:
 ./start.sh scan examples/probe.jpg --annotate out/boxed.jpg
 ```
 
+### Web dashboard
+
+```bash
+make ui           # or: ./start.sh ui   /   python -m faceproof.cli ui
+```
+
+Serves an interactive dashboard on <http://localhost:8080> (`--port` to change,
+`--no-browser` to skip auto-opening). Upload a face or use the bundled probe,
+watch all four stages run, and use the tamper sandbox to edit a field of the
+signed record and see re-verification reject it.
+
+The server binds `127.0.0.1` only. It shares one face engine and one chain
+client across requests, so on the in-process `tester` network the whole
+dashboard session shares a single chain — anchor in one request, re-verify in
+the next. Restarting the server starts that chain over; use `--network local`
+(with `make chain`) if you need anchors to outlive the process.
+
 ---
 
 ## Install & Manual Setup

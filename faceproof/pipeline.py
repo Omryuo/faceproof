@@ -151,7 +151,23 @@ def anchor_record(record: dict, client: ChainClient, uri: str = "") -> dict:
         receipt = client.anchor(stored, uri)
         return dict(receipt.to_dict(), status="anchored")
     except AlreadyAnchored as exc:
-        return dict(exc.existing, status="already_anchored", record_hash=stored)
+        # Re-anchoring is refused by the contract, which is the point: the first
+        # submission stands. Report it with the same keys a fresh anchor uses so
+        # callers never have to special-case the shape.
+        e = exc.existing
+        return {
+            "status": "already_anchored",
+            "network": e["network"],
+            "chain_id": e["chain_id"],
+            "contract_address": e["contract_address"],
+            "tx_hash": None,
+            "block_number": e["block_number"],
+            "block_timestamp": e["timestamp"],
+            "submitter": e["submitter"],
+            "gas_used": 0,
+            "uri": e.get("uri", ""),
+            "record_hash": stored,
+        }
 
 
 def reverify(record: dict, client: ChainClient) -> dict:

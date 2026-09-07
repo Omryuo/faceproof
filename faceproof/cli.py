@@ -166,26 +166,15 @@ def cmd_search(args):
     console.print(f"record hash: [bold yellow]{record['record_hash']}[/bold yellow]")
 
 
-# One client per (network, rpc) for the life of the process. This matters for
-# the in-process `tester` chain: building a second client would spin up a brand
-# new empty chain, so `run`'s verify step would never find what its anchor step
-# just wrote.
-_CLIENTS: dict[tuple, object] = {}
-
-
 def _client(args):
-    from .chain import ChainClient, ChainError
+    """Shared per-process client -- see faceproof.chain.pool for why."""
+    from .chain import ChainError, get_client
 
-    key = (args.network, args.rpc_url)
-    if key in _CLIENTS:
-        return _CLIENTS[key]
     try:
-        c = ChainClient(args.network, rpc_url=args.rpc_url)
+        return get_client(args.network, rpc_url=args.rpc_url)
     except ChainError as exc:
         console.print(f"[red]{exc}[/red]")
         sys.exit(3)
-    _CLIENTS[key] = c
-    return c
 
 
 def cmd_anchor(args):

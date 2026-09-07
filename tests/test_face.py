@@ -55,3 +55,53 @@ def test_no_face_returns_none(engine):
     ok, buf = cv2.imencode(".png", blank)
     assert ok
     assert engine.encode_primary(buf.tobytes()) is None
+
+
+def test_concurrent_encoding_is_safe_and_stable(engine, images):
+    """One FaceEngine is shared by the verifier's thread pool and by the
+    threaded web server. cv2's detector is stateful (setInputSize + detect),
+    so without a lock this aborts with an OpenCV shape assertion or returns
+    embeddings computed at another thread's input size."""
+    from concurrent.futures import ThreadPoolExecutor
+
+    baseline = {
+        name: engine.encode_primary(images[name]).embedding_sha256
+        for name in ("probe", "same_person")
+    }
+
+    def work(i):
+        name = "probe" if i % 2 == 0 else "same_person"
+        enc = engine.encode_primary(images[name])
+        assert enc is not None, "face vanished under concurrency"
+        return enc.embedding_sha256 == baseline[name]
+
+    for _ in range(3):
+        with ThreadPoolExecutor(max_workers=8) as pool:
+            assert all(pool.map(work, range(24)))
+
+
+def test_annotate_bytes_returns_the_callers_own_image(engine, images):
+    """The server annotated through a fixed temp file, so two concurrent
+    requests could hand each other the wrong picture."""
+    from concurrent.futures import ThreadPoolExecutor
+
+    expected = {
+        name: engine.annotate_bytes(images[name])[0]
+        for name in ("probe", "other_person_1")
+    }
+
+    def work(i):
+        name = "probe" if i % 2 == 0 else "other_person_1"
+        got, count = engine.annotate_bytes(images[name])
+        return got == expected[name] and count == 1
+
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        assert all(pool.map(work, range(16)))
+
+
+def test_annotate_writes_the_same_bytes_it_returns(engine, images, tmp_path):
+    out = tmp_path / "boxed.jpg"
+    n = engine.annotate(images["probe"], out)
+    encoded, n2 = engine.annotate_bytes(images["probe"])
+    assert n == n2 == 1
+    assert out.read_bytes() == encoded

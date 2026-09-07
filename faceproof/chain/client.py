@@ -72,6 +72,7 @@ class AnchorReceipt:
     network: str
     submitter: str
     gas_used: int
+    uri: str = ""
     explorer_url: str | None = None
 
     def to_dict(self) -> dict:
@@ -84,6 +85,7 @@ class AnchorReceipt:
             "block_timestamp": self.block_timestamp,
             "submitter": self.submitter,
             "gas_used": self.gas_used,
+            "uri": self.uri,
             "record_hash": self.record_hash,
         }
         if self.explorer_url:
@@ -120,7 +122,10 @@ class ChainClient:
             )
         w3 = Web3(Web3.HTTPProvider(url, request_kwargs={"timeout": 60}))
         if not w3.is_connected():
-            raise ChainError(f"could not connect to {url}")
+            hint = ""
+            if self.network == "local":
+                hint = " -- start one with `make chain` (ganache on :8545), or use --network tester"
+            raise ChainError(f"could not connect to {url}{hint}")
         if self.cfg.get("poa"):
             from web3.middleware import ExtraDataToPOAMiddleware
 
@@ -235,6 +240,7 @@ class ChainClient:
             network=self.network,
             submitter=self.account,
             gas_used=rcpt.gasUsed,
+            uri=uri,
             explorer_url=(explorer + tx_hex) if explorer else None,
         )
 

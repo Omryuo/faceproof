@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import hashlib
 import io
+import threading
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -107,7 +108,15 @@ def _fit(img: np.ndarray) -> np.ndarray:
 
 
 class FaceEngine:
-    """Lazily-loaded detector + recogniser pair."""
+    """Lazily-loaded detector + recogniser pair.
+
+    cv2's FaceDetectorYN carries per-instance state: `setInputSize` and
+    `detect` are two calls that must not be interleaved with another thread's
+    pair, or OpenCV aborts with a shape assertion. The verifier runs candidate
+    checks on a thread pool and the web server is threaded, so both share one
+    engine -- hence the lock around every native call. It is held only for the
+    cv2 work, so image decoding and network I/O still overlap freely.
+    """
 
     def __init__(self, det_threshold: float = 0.7):
         if not YUNET.exists() or not SFACE.exists():
@@ -116,6 +125,7 @@ class FaceEngine:
                 "Run: python -m faceproof.cli fetch-models"
             )
         self.det_threshold = det_threshold
+        self._lock = threading.Lock()
         self._detector = cv2.FaceDetectorYN.create(
             str(YUNET), "", (320, 320), det_threshold, 0.3, 5000
         )
@@ -124,8 +134,9 @@ class FaceEngine:
     def detect(self, img: np.ndarray) -> tuple[np.ndarray, list[Face]]:
         img = _fit(img)
         h, w = img.shape[:2]
-        self._detector.setInputSize((w, h))
-        _, raw = self._detector.detect(img)
+        with self._lock:
+            self._detector.setInputSize((w, h))
+            _, raw = self._detector.detect(img)
         faces: list[Face] = []
         if raw is None:
             return img, faces
@@ -137,8 +148,9 @@ class FaceEngine:
         return img, faces
 
     def encode_face(self, img: np.ndarray, face: Face) -> np.ndarray:
-        aligned = self._recogniser.alignCrop(img, face._row)
-        vec = self._recogniser.feature(aligned).flatten().astype(np.float32)
+        with self._lock:
+            aligned = self._recogniser.alignCrop(img, face._row)
+            vec = self._recogniser.feature(aligned).flatten().astype(np.float32)
         n = np.linalg.norm(vec)
         return vec / n if n else vec
 
@@ -157,8 +169,7 @@ class FaceEngine:
         encs = self.encode_bytes(data)
         return encs[0] if encs else None
 
-    def annotate(self, data: bytes, out_path: Path) -> int:
-        """Write a copy of the image with detection boxes drawn. Returns face count."""
+    def _draw(self, data: bytes) -> tuple[np.ndarray, int]:
         img = load_image(data)
         img, faces = self.detect(img)
         for i, f in enumerate(faces):
@@ -170,6 +181,21 @@ class FaceEngine:
             )
             for px, py in f.landmarks:
                 cv2.circle(img, (px, py), 2, (0, 128, 255), -1)
+        return img, len(faces)
+
+    def annotate_bytes(self, data: bytes) -> tuple[bytes, int]:
+        """Return a JPEG of the image with detection boxes drawn, plus the face
+        count. Nothing touches disk, so concurrent callers cannot overwrite each
+        other's output -- which a shared temp file would allow."""
+        img, n = self._draw(data)
+        ok, buf = cv2.imencode(".jpg", img, [int(cv2.IMWRITE_JPEG_QUALITY), 90])
+        if not ok:
+            raise ValueError("failed to encode annotated image")
+        return buf.tobytes(), n
+
+    def annotate(self, data: bytes, out_path: Path) -> int:
+        """Write a copy of the image with detection boxes drawn. Returns face count."""
+        encoded, n = self.annotate_bytes(data)
         out_path.parent.mkdir(parents=True, exist_ok=True)
-        cv2.imwrite(str(out_path), img)
-        return len(faces)
+        out_path.write_bytes(encoded)
+        return n
