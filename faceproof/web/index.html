@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FaceProof — Goa Beach Analysis Dashboard</title>
+  <meta name="description" content="FaceProof: Face scan, web verification, and blockchain anchoring with a tropical Goa beach aesthetic.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      /* Tropical Goa palette */
+      --green-deep: #1a6b4a;
+      --green-mid: #238b62;
+      --green-light: #2fa572;
+      --green-bg: #1b5e40;
+      --green-dark: #0f3d2b;
+      --green-darkest: #0a2e1f;
+      --yellow-sun: #ffd60a;
+      --yellow-warm: #ffb703;
+      --yellow-pale: #fff3b0;
+      --pink-hot: #e6377a;
+      --pink-light: #ff5c8d;
+      --sand-white: #faf8f0;
+      --sand-cream: #f5edd6;
+      --sand-warm: #ece0c0;
+      --white: #ffffff;
+      --text-dark: #0f2e1d;
+      --text-mid: #3a5a48;
+      --text-light: #6b8f7a;
+      --text-on-green: #c8e6d5;
+      --text-on-green-bright: #e0f5ea;
+      --danger-red: #d32f2f;
+      --success-green: #2e7d32;
+      --radius-xl: 24px;
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--green-darkest);
+      color: var(--text-dark);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ====== TROPICAL HERO BACKGROUND ====== */
+    .hero-bg {
+      position: relative;
+      width: 100%;
+      min-height: 340px;
+      background: linear-gradient(180deg, var(--green-dark) 0%, var(--green-deep) 40%, var(--green-mid) 70%, var(--green-light) 100%);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px 80px;
+    }
+
+    /* Sun */
+    .sun {
+      width: 180px;
+      height: 180px;
+      background: radial-gradient(circle, var(--yellow-sun) 55%, rgba(255, 214, 10, 0.5) 70%, transparent 100%);
+      border-radius: 50%;
+      position: relative;
+      z-index: 2;
+      box-shadow: 0 0 80px rgba(255, 214, 10, 0.6), 0 0 160px rgba(255, 183, 3, 0.3);
+      animation: sunPulse 4s ease-in-out infinite;
+    }
+
+    @keyframes sunPulse {
+      0%, 100% { box-shadow: 0 0 80px rgba(255, 214, 10, 0.6), 0 0 160px rgba(255, 183, 3, 0.3); }
+      50% { box-shadow: 0 0 100px rgba(255, 214, 10, 0.8), 0 0 200px rgba(255, 183, 3, 0.4); }
+    }
+
+    /* Sun rays */
+    .sun-rays {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 300px;
+      height: 300px;
+      z-index: 1;
+    }
+
+    .sun-rays .ray {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 3px;
+      height: 60px;
+      background: var(--yellow-sun);
+      transform-origin: center bottom;
+      border-radius: 2px;
+      opacity: 0.7;
+    }
+
+    /* Palm trees via SVG */
+    .palm-left, .palm-right {
+      position: absolute;
+      bottom: 0;
+      z-index: 3;
+      width: 180px;
+      height: auto;
+      opacity: 0.85;
+    }
+
+    .palm-left { left: 20px; }
+    .palm-right { right: 20px; transform: scaleX(-1); }
+
+    /* Wave strip at bottom of hero */
+    .wave-strip {
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 100%;
+      z-index: 4;
+    }
+
+    .wave-strip svg {
+      display: block;
+      width: 100%;
+      height: 60px;
+    }
+
+    /* Hero text */
+    .hero-content {
+      position: relative;
+      z-index: 5;
+      text-align: center;
+      margin-top: 28px;
+    }
+
+    .hero-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 3rem;
+      font-weight: 900;
+      color: var(--white);
+      letter-spacing: -1px;
+      text-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+    }
+
+    .hero-title .accent {
+      color: var(--yellow-sun);
+    }
+
+    .hero-subtitle {
+      font-size: 1.05rem;
+      color: var(--text-on-green-bright);
+      margin-top: 8px;
+      font-weight: 400;
+      max-width: 560px;
+      line-height: 1.5;
+    }
+
+    /* Beach badge */
+    .beach-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 20px;
+      background: var(--pink-hot);
+      color: var(--white);
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border-radius: 6px;
+      margin-top: 18px;
+      box-shadow: 0 4px 16px rgba(230, 55, 122, 0.4);
+    }
+
+    /* ====== MAIN CONTENT ====== */
+    .main-content {
+      background: var(--sand-white);
+      min-height: 60vh;
+      padding: 40px 24px 60px;
+    }
+
+    .container {
+      max-width: 1240px;
+      margin: 0 auto;
+    }
+
+    /* Dashboard Grid */
+    .dash-grid {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 28px;
+    }
+
+    @media (max-width: 960px) {
+      .dash-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Cards */
+    .card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      border: 1.5px solid #e0d9c8;
+      padding: 24px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+      transition: box-shadow 0.3s, border-color 0.3s;
+    }
+
+    .card:hover {
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+      border-color: var(--green-light);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding-bottom: 14px;
+      border-bottom: 2px solid var(--sand-cream);
+    }
+
+    .card-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .tag-green {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 20px;
+      background: rgba(47, 165, 114, 0.15);
+      color: var(--green-deep);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .tag-pink {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 20px;
+      background: rgba(230, 55, 122, 0.12);
+      color: var(--pink-hot);
+      text-transform: uppercase;
+    }
+
+    /* Dropzone */
+    .dropzone {
+      border: 2.5px dashed var(--green-light);
+      border-radius: var(--radius-md);
+      padding: 28px 20px;
+      text-align: center;
+      background: rgba(47, 165, 114, 0.04);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .dropzone:hover, .dropzone.dragover {
+      border-color: var(--yellow-warm);
+      background: rgba(255, 214, 10, 0.06);
+      box-shadow: 0 0 20px rgba(255, 183, 3, 0.15);
+    }
+
+    .dropzone-icon {
+      font-size: 2.6rem;
+      margin-bottom: 8px;
+    }
+
+    .dropzone-text {
+      font-weight: 600;
+      color: var(--text-dark);
+      font-size: 0.95rem;
+    }
+
+    .dropzone-sub {
+      font-size: 0.8rem;
+      color: var(--text-light);
+      margin-top: 4px;
+    }
+
+    /* Preview */
+    .preview-box {
+      margin-top: 14px;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1.5px solid #e0d9c8;
+      max-height: 240px;
+      display: flex;
+      justify-content: center;
+      background: var(--sand-cream);
+    }
+
+    .preview-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    /* Forms */
+    .form-group {
+      margin-top: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-mid);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    input[type="text"], select {
+      width: 100%;
+      padding: 11px 14px;
+      background: var(--sand-white);
+      border: 1.5px solid #d4cdb8;
+      border-radius: var(--radius-sm);
+      color: var(--text-dark);
+      font-size: 0.92rem;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input[type="text"]:focus, select:focus {
+      border-color: var(--green-light);
+      box-shadow: 0 0 0 3px rgba(47, 165, 114, 0.15);
+    }
+
+    /* Primary CTA button — tropical gradient */
+    .btn-primary {
+      width: 100%;
+      margin-top: 22px;
+      padding: 14px 24px;
+      background: linear-gradient(135deg, var(--green-deep) 0%, var(--green-mid) 60%, var(--yellow-warm) 100%);
+      background-size: 200% auto;
+      color: var(--white);
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 1.05rem;
+      border: none;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all 0.4s ease;
+      box-shadow: 0 6px 24px rgba(26, 107, 74, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .btn-primary:hover {
+      background-position: right center;
+      box-shadow: 0 8px 32px rgba(255, 183, 3, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Stepper */
+    .stepper-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 640px) {
+      .stepper-row { grid-template-columns: 1fr 1fr; }
+    }
+
+    .step-card {
+      background: var(--white);
+      border: 1.5px solid #e0d9c8;
+      border-radius: var(--radius-md);
+      padding: 14px 12px;
+      text-align: center;
+      transition: all 0.3s;
+    }
+
+    .step-card.active {
+      border-color: var(--yellow-warm);
+      background: rgba(255, 214, 10, 0.08);
+      box-shadow: 0 0 16px rgba(255, 183, 3, 0.2);
+    }
+
+    .step-card.completed {
+      border-color: var(--green-mid);
+      background: rgba(47, 165, 114, 0.08);
+    }
+
+    .step-num {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--text-light);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    .step-name {
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-top: 4px;
+      color: var(--text-dark);
+    }
+
+    .step-status {
+      font-size: 0.75rem;
+      margin-top: 5px;
+      color: var(--green-mid);
+      font-weight: 600;
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 56px 20px;
+      color: var(--text-light);
+    }
+
+    .empty-icon {
+      font-size: 3.5rem;
+      margin-bottom: 12px;
+    }
+
+    .empty-state h3 {
+      font-family: 'Outfit', sans-serif;
+      color: var(--text-dark);
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    /* Stage sections */
+    .stage-section {
+      margin-bottom: 24px;
+    }
+
+    .annotated-display {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      margin-top: 16px;
+    }
+
+    @media (max-width: 640px) {
+      .annotated-display { flex-direction: column; }
+    }
+
+    .ann-img-wrap {
+      flex: 0 0 220px;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1.5px solid #e0d9c8;
+      background: var(--sand-cream);
+    }
+
+    .ann-img-wrap img {
+      width: 100%;
+      display: block;
+      object-fit: contain;
+    }
+
+    .meta-table {
+      flex: 1;
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .meta-table td {
+      padding: 9px 12px;
+      font-size: 0.88rem;
+      border-bottom: 1px solid var(--sand-cream);
+    }
+
+    .meta-table td:first-child {
+      color: var(--text-light);
+      font-weight: 600;
+      width: 140px;
+    }
+
+    .code-pill {
+      font-family: 'JetBrains Mono', monospace, monospace;
+      font-size: 0.78rem;
+      background: rgba(26, 107, 74, 0.1);
+      color: var(--green-deep);
+      padding: 3px 8px;
+      border-radius: 4px;
+      word-break: break-all;
+    }
+
+    /* Match cards */
+    .matches-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .match-card {
+      background: var(--sand-white);
+      border: 1.5px solid #e0d9c8;
+      border-radius: var(--radius-md);
+      padding: 16px;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .match-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--green-light);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    }
+
+    .match-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .platform-badge {
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      background: rgba(255, 183, 3, 0.18);
+      color: #b87a00;
+    }
+
+    .verified-tag {
+      font-size: 0.72rem;
+      color: var(--success-green);
+      font-weight: 800;
+    }
+
+    .match-title {
+      font-weight: 700;
+      color: var(--text-dark);
+      font-size: 0.92rem;
+      margin-bottom: 4px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .match-url {
+      font-size: 0.78rem;
+      color: var(--green-mid);
+      word-break: break-all;
+      margin-bottom: 10px;
+    }
+
+    .match-url a {
+      color: var(--green-mid);
+      text-decoration: none;
+    }
+
+    .match-url a:hover {
+      text-decoration: underline;
+    }
+
+    .gauge-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      margin-bottom: 4px;
+    }
+
+    .gauge-bg {
+      height: 8px;
+      background: var(--sand-cream);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .gauge-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--green-mid), var(--yellow-warm));
+      border-radius: 4px;
+      transition: width 0.6s ease;
+    }
+
+    /* Blockchain receipt */
+    .chain-box {
+      background: linear-gradient(135deg, var(--green-dark) 0%, var(--green-deep) 100%);
+      border: 1.5px solid var(--green-light);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      margin-top: 16px;
+      color: var(--text-on-green-bright);
+    }
+
+    .receipt-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 9px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 0.88rem;
+      gap: 12px;
+    }
+
+    .receipt-row:last-child { border-bottom: none; }
+
+    .receipt-label { color: var(--text-on-green); font-weight: 500; white-space: nowrap; }
+
+    .receipt-val {
+      font-family: monospace;
+      font-size: 0.8rem;
+      color: var(--yellow-pale);
+      word-break: break-all;
+      text-align: right;
+    }
+
+    /* Verdict */
+    .verdict-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 18px;
+      border-radius: 30px;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 1rem;
+    }
+
+    .verdict-pill.pass {
+      background: rgba(46, 125, 50, 0.15);
+      border: 1.5px solid var(--success-green);
+      color: var(--success-green);
+    }
+
+    .verdict-pill.fail {
+      background: rgba(211, 47, 47, 0.12);
+      border: 1.5px solid var(--danger-red);
+      color: var(--danger-red);
+    }
+
+    /* Tamper sandbox */
+    .tamper-box {
+      margin-top: 22px;
+      padding: 18px;
+      background: rgba(211, 47, 47, 0.04);
+      border: 2px dashed rgba(211, 47, 47, 0.35);
+      border-radius: var(--radius-md);
+    }
+
+    .tamper-title {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      color: var(--danger-red);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1rem;
+    }
+
+    .tamper-desc {
+      font-size: 0.85rem;
+      color: var(--text-light);
+      margin-top: 4px;
+      line-height: 1.5;
+    }
+
+    .tamper-controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    @media (max-width: 640px) {
+      .tamper-controls { grid-template-columns: 1fr; }
+    }
+
+    .btn-tamper {
+      padding: 11px 20px;
+      background: var(--danger-red);
+      color: var(--white);
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      font-size: 0.9rem;
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s;
+    }
+
+    .btn-tamper:hover {
+      background: #b71c1c;
+      transform: translateY(-1px);
+    }
+
+    .tamper-result {
+      margin-top: 14px;
+    }
+
+    .tamper-fail-box {
+      padding: 14px;
+      background: rgba(211, 47, 47, 0.08);
+      border: 1.5px solid var(--danger-red);
+      border-radius: var(--radius-sm);
+    }
+
+    .tamper-pass-box {
+      padding: 14px;
+      background: rgba(46, 125, 50, 0.08);
+      border: 1.5px solid var(--success-green);
+      border-radius: var(--radius-sm);
+    }
+
+    /* Spinner */
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Footer */
+    .footer {
+      background: var(--green-darkest);
+      color: var(--text-on-green);
+      text-align: center;
+      padding: 28px 24px;
+      font-size: 0.85rem;
+    }
+
+    .footer a {
+      color: var(--yellow-warm);
+      text-decoration: none;
+    }
+
+    .footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+  <!-- ====== TROPICAL HERO ====== -->
+  <div class="hero-bg">
+    <!-- Sun with rays -->
+    <div style="position: relative;">
+      <div class="sun-rays" id="sun-rays"></div>
+      <div class="sun"></div>
+    </div>
+
+    <!-- Palm tree left -->
+    <svg class="palm-left" viewBox="0 0 200 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M85 320 L90 180 Q92 160 95 140 Q98 120 100 100" stroke="#1a5c3a" stroke-width="10" stroke-linecap="round" fill="none"/>
+      <ellipse cx="60" cy="90" rx="55" ry="22" fill="#1a5c3a" transform="rotate(-25 60 90)"/>
+      <ellipse cx="130" cy="85" rx="50" ry="20" fill="#1a5c3a" transform="rotate(20 130 85)"/>
+      <ellipse cx="90" cy="65" rx="48" ry="18" fill="#23774e" transform="rotate(-8 90 65)"/>
+      <ellipse cx="50" cy="110" rx="50" ry="18" fill="#23774e" transform="rotate(-40 50 110)"/>
+      <ellipse cx="140" cy="105" rx="45" ry="16" fill="#1a5c3a" transform="rotate(35 140 105)"/>
+    </svg>
+
+    <!-- Palm tree right -->
+    <svg class="palm-right" viewBox="0 0 200 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M85 320 L90 180 Q92 160 95 140 Q98 120 100 100" stroke="#1a5c3a" stroke-width="10" stroke-linecap="round" fill="none"/>
+      <ellipse cx="60" cy="90" rx="55" ry="22" fill="#1a5c3a" transform="rotate(-25 60 90)"/>
+      <ellipse cx="130" cy="85" rx="50" ry="20" fill="#1a5c3a" transform="rotate(20 130 85)"/>
+      <ellipse cx="90" cy="65" rx="48" ry="18" fill="#23774e" transform="rotate(-8 90 65)"/>
+      <ellipse cx="50" cy="110" rx="50" ry="18" fill="#23774e" transform="rotate(-40 50 110)"/>
+      <ellipse cx="140" cy="105" rx="45" ry="16" fill="#1a5c3a" transform="rotate(35 140 105)"/>
+    </svg>
+
+    <div class="hero-content">
+      <h1 class="hero-title">Face<span class="accent">Proof</span></h1>
+      <p class="hero-subtitle">Face scan → web &amp; social search → blockchain-anchored verification — all from one tropical dashboard.</p>
+      <div class="beach-badge">🏖️ GOA BEACH EDITION</div>
+    </div>
+
+    <!-- Wave divider -->
+    <div class="wave-strip">
+      <svg viewBox="0 0 1440 60" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+        <path d="M0,25 C240,55 480,0 720,30 C960,60 1200,10 1440,35 L1440,60 L0,60 Z" fill="#faf8f0"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- ====== MAIN DASHBOARD ====== -->
+  <div class="main-content">
+    <div class="container">
+      <div class="dash-grid">
+
+        <!-- Left: Probe Studio -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📸 Probe Studio</div>
+          </div>
+
+          <div class="dropzone" id="dropzone" onclick="document.getElementById('file-input').click()">
+            <div class="dropzone-icon">🌴</div>
+            <div class="dropzone-text">Drop your probe image here</div>
+            <div class="dropzone-sub">or click to select a photo</div>
+            <input type="file" id="file-input" accept="image/*" style="display: none;" onchange="handleFileSelect(event)">
+          </div>
+
+          <div class="preview-box" id="preview-box">
+            <img id="preview-img" src="/examples/probe.jpg" alt="Probe Preview">
+          </div>
+
+          <div class="form-group">
+            <label for="hint-input">Search Hint / Person Name</label>
+            <input type="text" id="hint-input" value="Sundar Pichai" placeholder="e.g. Sundar Pichai">
+          </div>
+
+          <div class="form-group">
+            <label for="network-select">EVM Blockchain Network</label>
+            <select id="network-select">
+              <option value="tester" selected>In-Process Tester (eth-tester)</option>
+              <option value="local">Local Ganache (:8545)</option>
+              <option value="sepolia">Sepolia Public Testnet</option>
+            </select>
+          </div>
+
+          <button class="btn-primary" id="run-btn" onclick="runAnalysis()">
+            <span id="btn-text">🚀 Run Analysis</span>
+            <div class="spinner" id="btn-spinner" style="display: none;"></div>
+          </button>
+        </div>
+
+        <!-- Right: Analysis Results -->
+        <div>
+          <!-- Stepper -->
+          <div class="stepper-row">
+            <div class="step-card" id="step-1">
+              <div class="step-num">Stage 1</div>
+              <div class="step-name">🔍 Face Scan</div>
+              <div class="step-status" id="status-1">Ready</div>
+            </div>
+            <div class="step-card" id="step-2">
+              <div class="step-num">Stage 2</div>
+              <div class="step-name">🌐 Web Match</div>
+              <div class="step-status" id="status-2">Ready</div>
+            </div>
+            <div class="step-card" id="step-3">
+              <div class="step-num">Stage 3</div>
+              <div class="step-name">⛓️ EVM Anchor</div>
+              <div class="step-status" id="status-3">Ready</div>
+            </div>
+            <div class="step-card" id="step-4">
+              <div class="step-num">Stage 4</div>
+              <div class="step-name">🛡️ Re-Verify</div>
+              <div class="step-status" id="status-4">Ready</div>
+            </div>
+          </div>
+
+          <!-- Empty State -->
+          <div class="card" id="empty-state">
+            <div class="empty-state">
+              <div class="empty-icon">🏄‍♂️</div>
+              <h3>Ready for Analysis</h3>
+              <p>Upload a face photo and hit "Run Analysis" to begin local scanning, web verification, and blockchain anchoring.</p>
+            </div>
+          </div>
+
+          <!-- Results (hidden initially) -->
+          <div id="results-container" style="display: none;">
+
+            <!-- Stage 1 -->
+            <div class="card stage-section">
+              <div class="card-header">
+                <div class="card-title">🔍 Stage 1 — Local Face Scan</div>
+                <span class="tag-green">YuNet + SFace</span>
+              </div>
+              <div class="annotated-display">
+                <div class="ann-img-wrap">
+                  <img id="stage1-img" src="" alt="Annotated Face">
+                </div>
+                <table class="meta-table">
+                  <tr><td>Detection Score</td><td id="stage1-score" style="color: var(--green-deep); font-weight: 700;">-</td></tr>
+                  <tr><td>Bounding Box</td><td id="stage1-bbox" class="code-pill">-</td></tr>
+                  <tr><td>Embedding</td><td>128-d L2 normalised</td></tr>
+                  <tr><td>Embedding SHA256</td><td id="stage1-sha" class="code-pill">-</td></tr>
+                  <tr><td>Image SHA256</td><td id="stage1-img-sha" class="code-pill">-</td></tr>
+                </table>
+              </div>
+            </div>
+
+            <!-- Stage 2 -->
+            <div class="card stage-section">
+              <div class="card-header">
+                <div class="card-title">🌐 Stage 2 — Web & Social Verification</div>
+                <span class="tag-green" id="stage2-count">0 Matches</span>
+              </div>
+              <p style="font-size: 0.88rem; color: var(--text-light); line-height: 1.5;">
+                Candidates fetched from web search providers, then verified locally using SFace cosine similarity. Only faces clearing ≥ 0.363 are promoted.
+              </p>
+              <div class="matches-grid" id="matches-grid"></div>
+            </div>
+
+            <!-- Stage 3 & 4 -->
+            <div class="card stage-section">
+              <div class="card-header">
+                <div class="card-title">⛓️ Stage 3 & 4 — Anchor & Verify</div>
+                <div id="verdict-container"></div>
+              </div>
+
+              <div class="chain-box">
+                <div class="receipt-row">
+                  <span class="receipt-label">Keccak-256 Digest:</span>
+                  <span class="receipt-val" id="rcpt-hash">-</span>
+                </div>
+                <div class="receipt-row">
+                  <span class="receipt-label">Network / Chain ID:</span>
+                  <span class="receipt-val" id="rcpt-network">-</span>
+                </div>
+                <div class="receipt-row">
+                  <span class="receipt-label">Registry Contract:</span>
+                  <span class="receipt-val" id="rcpt-contract">-</span>
+                </div>
+                <div class="receipt-row">
+                  <span class="receipt-label">Submitter:</span>
+                  <span class="receipt-val" id="rcpt-submitter">-</span>
+                </div>
+                <div class="receipt-row">
+                  <span class="receipt-label">Transaction Hash:</span>
+                  <span class="receipt-val" id="rcpt-tx">-</span>
+                </div>
+                <div class="receipt-row">
+                  <span class="receipt-label">Block / Timestamp:</span>
+                  <span class="receipt-val" id="rcpt-block" style="color: var(--yellow-sun);">-</span>
+                </div>
+              </div>
+
+              <!-- Tamper Sandbox -->
+              <div class="tamper-box">
+                <h4 class="tamper-title">🧪 Tamper Sandbox</h4>
+                <p class="tamper-desc">Modify a payload field and test if the blockchain catches the forgery in real time.</p>
+                <div class="tamper-controls">
+                  <input type="text" id="tamper-field" value="page_url" placeholder="Field name">
+                  <input type="text" id="tamper-val" value="https://example.com/forged" placeholder="Forged value">
+                  <button class="btn-tamper" onclick="testTamper()">🔥 Test Tamper</button>
+                </div>
+                <div class="tamper-result" id="tamper-result" style="display: none;"></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    FaceProof — Goa Beach Edition &nbsp;·&nbsp; Built with 🌴 OpenCV &amp; EVM &nbsp;·&nbsp;
+    <a href="https://github.com/Omryuo/faceproof" target="_blank">GitHub</a>
+  </div>
+
+  <script>
+    // Generate sun rays
+    (function() {
+      const container = document.getElementById('sun-rays');
+      for (let i = 0; i < 12; i++) {
+        const ray = document.createElement('div');
+        ray.className = 'ray';
+        ray.style.transform = `translate(-50%, -100%) rotate(${i * 30}deg)`;
+        container.appendChild(ray);
+      }
+    })();
+
+    let currentImageB64 = "";
+    let currentRecord = null;
+
+    // Drag & drop
+    const dropzone = document.getElementById('dropzone');
+    dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dragover'); });
+    dropzone.addEventListener('dragleave', () => { dropzone.classList.remove('dragover'); });
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('dragover');
+      if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+    });
+
+    function handleFileSelect(e) {
+      if (e.target.files.length) handleFile(e.target.files[0]);
+    }
+
+    function handleFile(file) {
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        currentImageB64 = evt.target.result;
+        document.getElementById('preview-img').src = currentImageB64;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function setStep(n, state, text) {
+      document.getElementById(`step-${n}`).className = `step-card ${state}`;
+      document.getElementById(`status-${n}`).innerText = text;
+    }
+
+    async function runAnalysis() {
+      const btn = document.getElementById('run-btn');
+      const btnText = document.getElementById('btn-text');
+      const spinner = document.getElementById('btn-spinner');
+
+      btn.disabled = true;
+      btnText.innerText = "Analyzing...";
+      spinner.style.display = "block";
+
+      setStep(1, 'active', 'Scanning...');
+      setStep(2, '', 'Pending');
+      setStep(3, '', 'Pending');
+      setStep(4, '', 'Pending');
+
+      const payload = {
+        hint: document.getElementById('hint-input').value || "Sundar Pichai",
+        network: document.getElementById('network-select').value || "tester",
+        image_b64: currentImageB64,
+        image_path: "examples/probe.jpg",
+        use_cache: true
+      };
+
+      try {
+        const res = await fetch('/api/pipeline', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || data.error) {
+          alert("Analysis Error: " + (data.error || "Failed"));
+          setStep(1, '', 'Error');
+          return;
+        }
+
+        currentRecord = data.record;
+        document.getElementById('empty-state').style.display = "none";
+        document.getElementById('results-container').style.display = "block";
+
+        // Stage 1
+        setStep(1, 'completed', '✓ Done');
+        document.getElementById('stage1-img').src = data.stage1.annotated_b64;
+        document.getElementById('stage1-score').innerText = (data.stage1.face.detection_score * 100).toFixed(1) + "%";
+        document.getElementById('stage1-bbox').innerText = JSON.stringify(data.stage1.face.bbox);
+        document.getElementById('stage1-sha').innerText = data.stage1.face.embedding_sha256;
+        document.getElementById('stage1-img-sha').innerText = data.stage1.face.image_sha256;
+
+        // Stage 2
+        setStep(2, 'completed', `${data.stage2b.total_verified} Matches`);
+        document.getElementById('stage2-count').innerText = `${data.stage2b.total_verified} Verified`;
+
+        const grid = document.getElementById('matches-grid');
+        grid.innerHTML = "";
+        data.stage2b.all_matches.forEach(m => {
+          const pct = (m.face_similarity * 100).toFixed(1);
+          const card = document.createElement('div');
+          card.className = "match-card";
+          card.innerHTML = `
+            <div class="match-header">
+              <span class="platform-badge">${m.platform || 'web'}</span>
+              <span class="verified-tag">✓ VERIFIED</span>
+            </div>
+            <div class="match-title">${m.title || m.page_url}</div>
+            <div class="match-url"><a href="${m.page_url}" target="_blank" rel="noopener">${m.page_url}</a></div>
+            <div class="gauge-label">
+              <span style="color: var(--text-light);">Cosine Similarity</span>
+              <span style="color: #b87a00; font-weight: 700;">${pct}%</span>
+            </div>
+            <div class="gauge-bg"><div class="gauge-fill" style="width: ${Math.min(100, m.face_similarity * 100)}%;"></div></div>
+          `;
+          grid.appendChild(card);
+        });
+
+        // Stage 3 & 4
+        setStep(3, 'completed', '✓ Anchored');
+        setStep(4, 'completed', data.stage4.verdict);
+
+        document.getElementById('rcpt-hash').innerText = data.stage3.record_hash;
+        document.getElementById('rcpt-network').innerText = `${data.stage3.receipt.network} (ID: ${data.stage3.receipt.chain_id})`;
+        document.getElementById('rcpt-contract').innerText = data.stage3.receipt.contract_address;
+        document.getElementById('rcpt-submitter').innerText = data.stage3.receipt.submitter;
+        document.getElementById('rcpt-tx').innerText = data.stage3.receipt.tx_hash;
+        document.getElementById('rcpt-block').innerText = `Block #${data.stage3.receipt.block_number} • ${new Date(data.stage3.receipt.block_timestamp * 1000).toLocaleString()}`;
+
+        const vc = document.getElementById('verdict-container');
+        vc.innerHTML = data.stage4.verdict === 'VERIFIED'
+          ? `<div class="verdict-pill pass">✓ VERIFIED</div>`
+          : `<div class="verdict-pill fail">✗ FAILED</div>`;
+
+      } catch (err) {
+        alert("Server error: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btnText.innerText = "🚀 Run Analysis";
+        spinner.style.display = "none";
+      }
+    }
+
+    async function testTamper() {
+      if (!currentRecord) { alert("Run an analysis first."); return; }
+
+      const field = document.getElementById('tamper-field').value || "page_url";
+      const val = document.getElementById('tamper-val').value || "https://example.com/forged";
+      const network = document.getElementById('network-select').value || "tester";
+      const box = document.getElementById('tamper-result');
+      box.style.display = "block";
+      box.innerHTML = "<div style='color: var(--text-light); font-size: 0.9rem;'>Testing hash & on-chain lookup...</div>";
+
+      try {
+        const res = await fetch('/api/tamper', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ record: currentRecord, field, value: val, network })
+        });
+        const data = await res.json();
+
+        if (data.onchain_verdict.verdict === 'FAILED') {
+          box.innerHTML = `
+            <div class="tamper-fail-box">
+              <div style="color: var(--danger-red); font-family: 'Outfit'; font-weight: 800; font-size: 1rem;">🛡️ TAMPERING DETECTED!</div>
+              <div style="font-size: 0.85rem; margin-top: 8px; color: var(--text-dark);">
+                Original: <span class="code-pill">${data.original_record_hash}</span>
+              </div>
+              <div style="font-size: 0.85rem; margin-top: 4px; color: var(--text-dark);">
+                Recomputed: <span class="code-pill" style="color: var(--danger-red);">${data.recomputed_record_hash}</span>
+              </div>
+              <div style="font-size: 0.82rem; color: var(--text-light); margin-top: 6px;">
+                The Keccak-256 digest changed — the blockchain correctly rejected the tampered evidence.
+              </div>
+            </div>`;
+        } else {
+          box.innerHTML = `<div class="tamper-pass-box"><div style="color: var(--success-green); font-weight: 800;">✓ VERIFICATION PASSED</div></div>`;
+        }
+      } catch (err) {
+        alert("Tamper test error: " + err.message);
+      }
+    }
+  </script>
+</body>
+</html>

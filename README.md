@@ -67,7 +67,25 @@ media posts, found by search and confirmed by face match — not hardcoded.
 
 ---
 
-## Install
+## Quick Start (Single Command)
+
+To set up dependencies, models, example images, and run the complete end-to-end pipeline in one single step:
+
+```bash
+./start.sh
+# or
+make run
+```
+
+You can also pass CLI subcommands directly to `./start.sh`, e.g.:
+
+```bash
+./start.sh scan examples/probe.jpg --annotate out/boxed.jpg
+```
+
+---
+
+## Install & Manual Setup
 
 Requires Python 3.10+. Node is only needed for the optional persistent local
 chain.
@@ -81,7 +99,7 @@ make examples     # demo photographs (not redistributed in this repo)
 make test         # 40 tests
 ```
 
-## Run the whole thing
+## Run the whole thing manually
 
 ```bash
 ./scripts/demo.sh

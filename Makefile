@@ -1,7 +1,14 @@
 VENV := .venv
 PY   := $(VENV)/bin/python
 
-.PHONY: setup models examples test chain demo clean
+.PHONY: setup models examples test chain demo clean run ui
+
+run:
+	./start.sh
+
+ui:
+	./start.sh ui
+
 
 setup:
 	python3 -m venv $(VENV)

@@ -51,6 +51,13 @@ def cmd_fetch_models(args):
     fetch_all(console)
 
 
+def cmd_ui(args):
+    from .server import start_server
+
+    start_server(port=args.port, open_browser=not args.no_browser)
+
+
+
 def cmd_scan(args):
     _rule("Stage 1 - face scan")
     engine = _engine()
@@ -322,6 +329,11 @@ def build_parser() -> argparse.ArgumentParser:
 
     sp = sub.add_parser("fetch-models", help="download the ONNX face models")
     sp.set_defaults(func=cmd_fetch_models)
+
+    sp = sub.add_parser("ui", help="launch the beach-themed interactive web dashboard")
+    sp.add_argument("--port", type=int, default=8080, help="port to listen on (default 8080)")
+    sp.add_argument("--no-browser", action="store_true", help="do not auto-open browser")
+    sp.set_defaults(func=cmd_ui)
 
     sp = sub.add_parser("scan", help="stage 1 only: detect + encode faces")
     sp.add_argument("image")
